@@ -3,9 +3,14 @@ defmodule AppTest do
   doctest App
 
   describe "evaluate" do
-    test "single statement" do
+    test "single statement with semicolon" do
       int = Enum.random(1..100)
       assert {:ok, int} == App.evaluate("#{int};")
+    end
+
+    test "single statement without semicolon" do
+      int = Enum.random(1..100)
+      assert {:ok, int} == App.evaluate("#{int}")
     end
 
     test "multi statement" do
@@ -18,6 +23,12 @@ defmodule AppTest do
       int_a = Enum.random(1..100)
       int_b = Enum.random(1..100)
       assert {:ok, int_a + int_b} == App.evaluate("#{int_a} + #{int_b};")
+    end
+
+    test "operation add (concat strings)" do
+      str_a = "foo"
+      str_b = "bar"
+      assert {:ok, str_a <> str_b} == App.evaluate(~s/"#{str_a}" + "#{str_b}";/)
     end
 
     test "operation sub" do

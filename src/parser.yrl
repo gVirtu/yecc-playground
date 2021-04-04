@@ -10,6 +10,7 @@ Nonterminals
 % List of valid terminal symbols
 Terminals
   integer
+  string
   name
   '+'
   '-'
@@ -41,6 +42,8 @@ Left 400 '/'.
 root -> statements : '$1'.
 
 % A list of statements is one or more statement, separated by a semicolon.
+% The last semicolon is optional.
+statements -> statement : ['$1'].
 statements -> statement ';' : ['$1'].
 statements -> statement ';' statements : ['$1'|'$3'].
 
@@ -53,6 +56,9 @@ assignment -> name '=' expression : {assign, '$1', '$3'}.
 
 % An expression can be a constant integer.
 expression -> integer : unwrap('$1').
+
+% An expression can be a literal string.
+expression -> string : '$1'.
 
 % An expression can return the value of a variable.
 expression -> name : '$1'.

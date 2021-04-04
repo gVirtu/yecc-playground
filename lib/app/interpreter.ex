@@ -6,6 +6,9 @@ defmodule App.Interpreter do
   def eval(ctx, {:integer, _line, number}), do:
     return(ctx, number)
 
+  def eval(ctx, {:string, _line, charlist}), do:
+    return(ctx, List.to_string(charlist))
+
   def eval(ctx, {:name, _line, name}) do
     value = binding_of(ctx, name)
 
@@ -15,7 +18,7 @@ defmodule App.Interpreter do
   def eval(ctx, {:op_add, lhs, rhs}), do:
     return(
       ctx,
-      return_of(ctx, lhs) + return_of(ctx, rhs)
+      do_add(return_of(ctx, lhs), return_of(ctx, rhs))
     )
 
   def eval(ctx, {:op_sub, lhs, rhs}), do:
@@ -42,6 +45,14 @@ defmodule App.Interpreter do
     ctx
     |> bind(name, value)
     |> return(value)
+  end
+
+  defp do_add(a, b) when is_number(a) and is_number(b) do
+    a + b
+  end
+
+  defp do_add(a, b) when is_binary(a) and is_binary(b) do
+    a <> b
   end
 
   defp return(ctx, value) do
