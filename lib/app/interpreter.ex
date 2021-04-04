@@ -47,6 +47,12 @@ defmodule App.Interpreter do
     |> return(value)
   end
 
+  def eval(ctx, {:call, {:name, _, name}, args}) do
+    arg_values = Enum.map(args, & return_of(ctx, &1))
+
+    apply(App.Functions, name, [ctx | arg_values])
+  end
+
   defp do_add(a, b) when is_number(a) and is_number(b) do
     a + b
   end
@@ -55,11 +61,11 @@ defmodule App.Interpreter do
     a <> b
   end
 
-  defp return(ctx, value) do
+  def return(ctx, value) do
     %{ctx | return: value}
   end
 
-  defp bind(ctx, key, value) do
+  def bind(ctx, key, value) do
     %{ctx | bindings: Map.put(ctx.bindings, key, value)}
   end
 

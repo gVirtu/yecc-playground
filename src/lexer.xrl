@@ -13,6 +13,7 @@ Rules.
 \/            : {token, {'/',  TokenLine}}.
 \=            : {token, {'=',  TokenLine}}.
 \;            : {token, {';',  TokenLine}}.
+\,            : {token, {',',  TokenLine}}.
 \(            : {token, {'(',  TokenLine}}.
 \)            : {token, {')',  TokenLine}}.
 {NAME}        : {token, {name, TokenLine, list_to_atom(TokenChars)}}.

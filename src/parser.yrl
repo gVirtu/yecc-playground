@@ -5,6 +5,8 @@ Nonterminals
   statement
   expression
   assignment
+  function_call
+  arguments
 .
 
 % List of valid terminal symbols
@@ -20,6 +22,7 @@ Terminals
   ';'
   '('
   ')'
+  ','
 .
 
 % List of valid root symbols
@@ -63,6 +66,9 @@ expression -> string : '$1'.
 % An expression can return the value of a variable.
 expression -> name : '$1'.
 
+% An expression can be a function call.
+expression -> function_call : '$1'.
+
 % An expression can be parenthesized.
 expression -> '(' expression ')' : '$2'.
 
@@ -71,6 +77,13 @@ expression -> expression '+' expression : {op_add, '$1', '$3'}.
 expression -> expression '-' expression : {op_sub, '$1', '$3'}.
 expression -> expression '*' expression : {op_mul, '$1', '$3'}.
 expression -> expression '/' expression : {op_div, '$1', '$3'}.
+
+% A function call is comprised of a function name and a parenthesized list of arguments.
+function_call -> name '(' arguments ')' : {call, '$1', '$3'}.
+
+% A list of arguments is one or more expression, separated by a comma.
+arguments -> expression : ['$1'].
+arguments -> expression ',' arguments : ['$1'|'$3'].
 
 % Helper functions
 Erlang code.
