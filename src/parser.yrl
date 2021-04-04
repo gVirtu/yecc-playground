@@ -7,13 +7,19 @@ Nonterminals
   assignment
   function_call
   arguments
+  sign_operator
 .
 
 % List of valid terminal symbols
 Terminals
   integer
+  boolean
   string
   name
+  or_operator
+  and_operator
+  not_operator
+  cmp_operator
   '+'
   '-'
   '*'
@@ -32,10 +38,15 @@ Rootsymbol
 
 % Operator precendence and associativeness. (higher number means highers precedence)
 Right 100 '='.
-Left 300 '+'.
-Left 300 '-'.
-Left 400 '*'.
-Left 400 '/'.
+Left 110 or_operator.
+Left 120 and_operator.
+Left 150 cmp_operator.
+Left 210 '+'.
+Left 210 '-'.
+Left 220 '*'.
+Left 220 '/'.
+Unary 300 not_operator.
+Unary 310 sign_operator.
 
 %% ------------------------------------------------------------------------------------------------
 %% PARSER RULES
@@ -57,11 +68,10 @@ statement -> expression : '$1'.
 % An assignment binds a variable name to an expression.
 assignment -> name '=' expression : {assign, '$1', '$3'}.
 
-% An expression can be a constant integer.
+% An expression can be a literal.
 expression -> integer : unwrap('$1').
-
-% An expression can be a literal string.
 expression -> string : '$1'.
+expression -> boolean : '$1'.
 
 % An expression can return the value of a variable.
 expression -> name : '$1'.
@@ -72,11 +82,22 @@ expression -> function_call : '$1'.
 % An expression can be parenthesized.
 expression -> '(' expression ')' : '$2'.
 
+% An expression can be an unary operation.
+expression -> sign_operator expression : {op_krn, type_of('$1'), '$2'}.
+expression -> not_operator expression  : {op_krn, 'not', '$2'}.
+
 % An expression can be an arithmetic operation.
-expression -> expression '+' expression : {op_add, '$1', '$3'}.
-expression -> expression '-' expression : {op_sub, '$1', '$3'}.
-expression -> expression '*' expression : {op_mul, '$1', '$3'}.
-expression -> expression '/' expression : {op_div, '$1', '$3'}.
+expression -> expression '+' expression : {op_krn, '+', '$1', '$3'}.
+expression -> expression '-' expression : {op_krn, '-', '$1', '$3'}.
+expression -> expression '*' expression : {op_krn, '*', '$1', '$3'}.
+expression -> expression '/' expression : {op_krn, '/', '$1', '$3'}.
+
+% An expression can be a boolean operation.
+expression -> expression or_operator expression : {op_krn, 'or', '$1', '$3'}.
+expression -> expression and_operator expression : {op_krn, 'and', '$1', '$3'}.
+
+% An expression can be a comparison operation.
+expression -> expression cmp_operator expression : {op_krn, value_of('$2'), '$1', '$3'}.
 
 % A function call is comprised of a function name and a parenthesized list of arguments.
 function_call -> name '(' arguments ')' : {call, '$1', '$3'}.
@@ -85,7 +106,13 @@ function_call -> name '(' arguments ')' : {call, '$1', '$3'}.
 arguments -> expression : ['$1'].
 arguments -> expression ',' arguments : ['$1'|'$3'].
 
+% A sign_operator is a plus or minus.
+sign_operator -> '+' : '$1'.
+sign_operator -> '-' : '$1'.
+
 % Helper functions
 Erlang code.
 
+type_of(Token) -> element(1, Token).
+value_of(Token) -> element(3, Token).
 unwrap({integer, Line, Value}) -> {integer, Line, list_to_integer(Value)}.

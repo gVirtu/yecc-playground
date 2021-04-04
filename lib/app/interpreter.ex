@@ -2,9 +2,16 @@ defmodule App.Interpreter do
   @moduledoc """
   Evaluates program statements and returns results
   """
+  require Kernel
+
+  @kernel_un_ops [:+, :-, :not]
+  @kernel_bin_ops [:-, :*, :/, :and, :or, :<, :>, :<=, :>=, :==, :!=]
 
   def eval(ctx, {:integer, _line, number}), do:
     return(ctx, number)
+
+  def eval(ctx, {:boolean, _line, boolean}), do:
+    return(ctx, boolean)
 
   def eval(ctx, {:string, _line, charlist}), do:
     return(ctx, List.to_string(charlist))
@@ -15,28 +22,27 @@ defmodule App.Interpreter do
     return(ctx, value)
   end
 
-  def eval(ctx, {:op_add, lhs, rhs}), do:
+  Enum.each(@kernel_un_ops, fn op ->
+    def eval(ctx, {:op_krn, unquote(op), rhs}), do:
+      return(
+        ctx,
+        Kernel.unquote(op)(return_of(ctx, rhs))
+      )
+  end)
+
+  Enum.each(@kernel_bin_ops, fn op ->
+    def eval(ctx, {:op_krn, unquote(op), lhs, rhs}), do:
+      return(
+        ctx,
+        Kernel.unquote(op)(return_of(ctx, lhs), return_of(ctx, rhs))
+      )
+  end)
+
+  # Add is overloaded to allow concat
+  def eval(ctx, {:op_krn, :+, lhs, rhs}), do:
     return(
       ctx,
       do_add(return_of(ctx, lhs), return_of(ctx, rhs))
-    )
-
-  def eval(ctx, {:op_sub, lhs, rhs}), do:
-    return(
-      ctx,
-      return_of(ctx, lhs) - return_of(ctx, rhs)
-    )
-
-  def eval(ctx, {:op_mul, lhs, rhs}), do:
-    return(
-      ctx,
-      return_of(ctx, lhs) * return_of(ctx, rhs)
-    )
-
-  def eval(ctx, {:op_div, lhs, rhs}), do:
-    return(
-      ctx,
-      return_of(ctx, lhs) / return_of(ctx, rhs)
     )
 
   def eval(ctx, {:assign, {:name, _, name}, rhs}) do

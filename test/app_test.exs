@@ -49,7 +49,15 @@ defmodule AppTest do
       assert {:ok, int_a / int_b} == App.evaluate("#{int_a} / #{int_b};")
     end
 
-    test "operator precedence" do
+    test "unary operators" do
+      int_a = Enum.random(1..100)
+      assert {:ok, -int_a} == App.evaluate("-#{int_a};")
+      assert {:ok, +int_a} == App.evaluate("+#{int_a};")
+      assert {:ok, true} == App.evaluate("!false;")
+      assert {:ok, false} == App.evaluate("not true;")
+    end
+
+    test "arithmetic operator precedence" do
       int_a = Enum.random(1..100)
       int_b = Enum.random(1..100)
       int_c = Enum.random(1..100)
@@ -67,6 +75,24 @@ defmodule AppTest do
       assert {:ok, (int_a - int_b) * int_c} == App.evaluate("(#{int_a} - #{int_b}) * #{int_c};")
       assert {:ok, (int_a + int_b) / int_c} == App.evaluate("(#{int_a} + #{int_b}) / #{int_c};")
       assert {:ok, (int_a - int_b) / int_c} == App.evaluate("(#{int_a} - #{int_b}) / #{int_c};")
+    end
+
+    test "numeric comparison" do
+      int_a = Enum.random(1..100)
+      int_b = Enum.random(1..100)
+      assert {:ok, (int_a > int_b)} == App.evaluate("#{int_a} > #{int_b};")
+      assert {:ok, (int_a < int_b)} == App.evaluate("#{int_a} < #{int_b};")
+      assert {:ok, (int_a >= int_b)} == App.evaluate("#{int_a} >= #{int_b};")
+      assert {:ok, (int_a <= int_b)} == App.evaluate("#{int_a} <= #{int_b};")
+      assert {:ok, (int_a != int_b)} == App.evaluate("#{int_a} != #{int_b};")
+      assert {:ok, (int_a == int_b)} == App.evaluate("#{int_a} == #{int_b};")
+    end
+
+    test "boolean expressions" do
+      assert {:ok, true} == App.evaluate("true or false")
+      assert {:ok, false} == App.evaluate("true and false")
+      assert {:ok, true} == App.evaluate("true || false")
+      assert {:ok, false} == App.evaluate("true && false")
     end
 
     test "assignment" do
