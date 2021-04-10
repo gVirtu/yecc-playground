@@ -8,6 +8,13 @@ Nonterminals
   function_call
   arguments
   sign_operator
+  array
+  array_items
+  map
+  field_set
+  field_key
+  accessor
+  accessor_items
 .
 
 % List of valid terminal symbols
@@ -25,9 +32,14 @@ Terminals
   '*'
   '/'
   '='
+  ':'
   ';'
   '('
   ')'
+  '['
+  ']'
+  '{'
+  '}'
   ','
 .
 
@@ -63,6 +75,7 @@ statements -> statement ';' statements : ['$1'|'$3'].
 
 % A statement can be an expression or an assignment.
 statement -> assignment : '$1'.
+statement -> expression accessor : {access, '$1', '$2'}.
 statement -> expression : '$1'.
 
 % An assignment binds a variable name to an expression.
@@ -72,9 +85,11 @@ assignment -> name '=' expression : {assign, '$1', '$3'}.
 expression -> integer : unwrap('$1').
 expression -> string : '$1'.
 expression -> boolean : '$1'.
+expression -> array : '$1'.
+expression -> map : '$1'.
 
 % An expression can return the value of a variable.
-expression -> name : '$1'.
+expression -> name : {var, '$1'}.
 
 % An expression can be a function call.
 expression -> function_call : '$1'.
@@ -109,6 +124,32 @@ arguments -> expression ',' arguments : ['$1'|'$3'].
 % A sign_operator is a plus or minus.
 sign_operator -> '+' : '$1'.
 sign_operator -> '-' : '$1'.
+
+% An array is a list of items, enclosed in brackets.
+array -> '[' array_items ']' : {array, '$2'}.
+
+% Array items are expressions separated by commas.
+array_items -> expression : ['$1'].
+array_items -> expression ',' array_items : ['$1'|'$3'].
+
+% A map is a set of fields, enclosed in curly braces.
+map -> '{' field_set '}' : {map, '$2'}.
+
+% Field set entries are composed of the key name, then a colon, then the key value.
+% Entries are separated by commas.
+field_set -> field_key ':' expression : [{'$1', '$3'}].
+field_set -> field_key ':' expression ',' field_set : [{'$1', '$3'} | '$5'].
+
+% Key names can be either a name or a string literal.
+field_key -> name : '$1'.
+field_key -> string : '$1'.
+
+% Accessors are a list of items enclosed by brackets.
+accessor -> '[' accessor_items ']' : '$2'.
+
+% Accessor items are expressions separated by commas.
+accessor_items -> expression : ['$1'].
+accessor_items -> expression ',' accessor_items : ['$1'|'$3'].
 
 % Helper functions
 Erlang code.

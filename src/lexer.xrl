@@ -17,16 +17,21 @@ Rules.
 \*             : {token, {'*',  TokenLine}}.
 \/             : {token, {'/',  TokenLine}}.
 \=             : {token, {'=',  TokenLine}}.
+\:             : {token, {':',  TokenLine}}.
 \;             : {token, {';',  TokenLine}}.
 \,             : {token, {',',  TokenLine}}.
 \(             : {token, {'(',  TokenLine}}.
 \)             : {token, {')',  TokenLine}}.
+\[             : {token, {'[',  TokenLine}}.
+\]             : {token, {']',  TokenLine}}.
+\{             : {token, {'{',  TokenLine}}.
+\}             : {token, {'}',  TokenLine}}.
 {BOOLEAN}      : {token, {boolean, TokenLine, list_to_atom(TokenChars)}}.
 {CMP_OPERATOR} : {token, {cmp_operator, TokenLine, list_to_atom(TokenChars)}}.
 {OR_OPERATOR}  : {token, {or_operator, TokenLine}}.
 {AND_OPERATOR} : {token, {and_operator, TokenLine}}.
 {NOT_OPERATOR} : {token, {not_operator, TokenLine}}.
-{NAME}         : {token, {name, TokenLine, list_to_atom(TokenChars)}}.
+{NAME}         : {token, {name, TokenLine, TokenChars}}.
 {INTEGER}      : {token, {integer,  TokenLine, TokenChars}}.
 {STRING}       : {token, {string, TokenLine, trim_quotes(TokenChars)}}.
 {WHITESPACE}+  : skip_token.
