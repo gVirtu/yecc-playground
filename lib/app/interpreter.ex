@@ -7,6 +7,9 @@ defmodule App.Interpreter do
   @kernel_un_ops [:+, :-, :not]
   @kernel_bin_ops [:-, :*, :/, :and, :or, :<, :>, :<=, :>=, :==, :!=]
 
+  def eval(ctx, nil), do:
+    return(ctx, nil)
+
   def eval(ctx, {:integer, _line, number}), do:
     return(ctx, number)
 
@@ -14,7 +17,7 @@ defmodule App.Interpreter do
     return(ctx, boolean)
 
   def eval(ctx, {:string, _line, charlist}), do:
-    return(ctx, List.to_string(charlist))
+    return(ctx, charlist |> List.to_string() |> Macro.unescape_string())
 
   def eval(ctx, {:array, items}), do:
     return(ctx, Enum.map(items, & return_of(ctx, &1)))
@@ -68,7 +71,7 @@ defmodule App.Interpreter do
 
   def eval(ctx, {:call, {:name, _, name}, args}) do
     arg_values = Enum.map(args, & return_of(ctx, &1))
-    function_name = List.to_existing_atom(name)
+    function_name = List.to_atom(name)
 
     apply(App.Functions, function_name, [ctx | arg_values])
   end
